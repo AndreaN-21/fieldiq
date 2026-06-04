@@ -18,38 +18,46 @@ You will receive:
 1. A defect description written by a field inspector
 2. A set of excerpts from technical standards and building norms (your ONLY allowed sources)
 
-Your response must be valid JSON matching this schema exactly:
+Your response must be a single valid JSON object. No text before or after it.
+
+JSON schema (follow exactly):
 {
-  "defect_type": "string — e.g., 'Structural crack', 'Moisture infiltration', 'Spalling'",
-  "affected_component": "string — e.g., 'Reinforced concrete slab', 'External facade masonry'",
-  "likely_cause": "string — 1-2 sentences, technical, concise",
-  "severity": "one of: Critical, High, Medium, Low",
-  "severity_justification": "string — 1-2 sentences explaining the severity rating",
+  "defect_type": "short label, e.g. 'Moisture infiltration' — plain text, no markdown",
+  "affected_component": "short label, e.g. 'Basement wall masonry' — plain text, no markdown",
+  "likely_cause": "1-2 sentences, technical, concise — plain text, no markdown headers",
+  "severity": "exactly one of: Critical, High, Medium, Low",
+  "severity_justification": "1-2 sentences — plain text, no markdown headers, separate from severity",
   "norm_references": [
     {
-      "title": "string — full name of the standard",
-      "article": "string — specific article or section number",
-      "excerpt": "string — verbatim excerpt from the provided context, max 200 chars",
-      "source_url": "string — from the document metadata"
+      "title": "full name of the standard or guide",
+      "article": "article/section number if present, otherwise 'p.<page number>' e.g. 'p.69'",
+      "excerpt": "verbatim excerpt from the provided context only, max 200 chars",
+      "source_url": "URL from the document metadata provided in context"
     }
   ],
-  "report_template": "string — markdown-formatted pre-filled section for an inspection report",
+  "report_template": "markdown string — see format below",
   "disclaimer": "AI-assisted analysis based on public technical standards. Must be reviewed by a certified inspector before inclusion in official reports."
 }
 
 CRITICAL RULES:
-- norm_references must ONLY cite documents present in the provided context. Never invent norm numbers.
-- If the provided context does not contain a relevant norm, set norm_references to an empty array.
-- severity must reflect structural risk, not just cosmetic concern. A large crack near a load-bearing element is Critical even if it looks minor.
-- report_template must use the following markdown structure:
+- defect_type, affected_component, likely_cause, severity_justification must be plain text strings. Never use markdown headers (##, ###) inside these fields.
+- severity must be exactly one word: Critical, High, Medium, or Low. Nothing else in that field.
+- severity_justification is a separate field from severity — never concatenate them.
+- norm_references must ONLY cite documents present in the provided context. Never invent norm numbers or URLs.
+- You MUST include a norm_reference for every document in the context that contains content relevant to the defect, even partially. Do not leave norm_references empty if the context contains any relevant text.
+- If a document has no visible article number, use the page number as the article field: e.g. 'p.69'.
+- If the context contains no relevant content at all, only then set norm_references to [].
+- severity must reflect structural risk. A large crack near a load-bearing element is Critical even if it looks minor.
+- report_template must use exactly this markdown structure:
   ## Defect Observation
   [pre-filled based on description]
   ## Classification
   [type + component]
   ## Applicable Standards
-  [list of references]
+  For each relevant norm, one bullet with: standard name + article, why it applies, key requirement/limit value.
+  Example: - **NIST TN 2220, Section 3.2** — Applies because moisture infiltration in basements requires assessment of wall permeability. Requirement: "...verbatim key sentence..."
   ## Recommended Action
-  [derived from severity]
+  [concrete action derived from severity: Critical=immediate intervention, High=urgent repair within weeks, Medium=planned maintenance, Low=monitor]
 - Do not add any text outside the JSON object.
 """
 
@@ -61,10 +69,46 @@ def _format_chunks(chunks: list[RetrievedChunk]) -> str:
 
     parts: list[str] = []
     for chunk in chunks:
-        header = f"[Source: {chunk.title}, Page {chunk.page}]"
+        header = f"[Source: {chunk.title}, Page {chunk.page}, URL: {chunk.source_url}]"
         parts.append(f"{header}\n{chunk.text}")
 
     return "\n\n".join(parts)
+
+
+import re
+
+def _sanitize(raw: dict) -> dict:
+    """Strip markdown headers and fix common GPT formatting mistakes in plain-text fields."""
+
+    def clean(text: str) -> str:
+        if not isinstance(text, str):
+            return text
+        # Remove lines that are only markdown headers (## Title, ### Title)
+        lines = text.splitlines()
+        cleaned = [re.sub(r"^#{1,4}\s+", "", line) for line in lines]
+        return "\n".join(cleaned).strip()
+
+    # Fields that must be plain text (no markdown headers)
+    for field in ("defect_type", "affected_component", "likely_cause", "severity_justification"):
+        if field in raw:
+            raw[field] = clean(raw[field])
+
+    # severity must be exactly one word — strip anything after the first word
+    if "severity" in raw and isinstance(raw["severity"], str):
+        # Fix "HighWhile there are no..." → split into severity + justification
+        valid = {"Critical", "High", "Medium", "Low"}
+        for level in valid:
+            if raw["severity"].startswith(level) and raw["severity"] != level:
+                # The model concatenated severity + justification
+                overflow = raw["severity"][len(level):].strip()
+                raw["severity"] = level
+                # Prepend the overflow to severity_justification if it's missing context
+                existing = raw.get("severity_justification", "")
+                if overflow and overflow not in existing:
+                    raw["severity_justification"] = overflow + (" " + existing if existing else "")
+                break
+
+    return raw
 
 
 def analyze(description: str, context_chunks: list[RetrievedChunk]) -> dict:
@@ -82,7 +126,7 @@ def analyze(description: str, context_chunks: list[RetrievedChunk]) -> dict:
 
     client = openai.OpenAI(
         api_key=settings.openai_api_key,
-        base_url=settings.openai_base_url,
+        base_url=settings.openai_base_url
     )
 
     logger.debug(f"Calling {settings.openai_model} with {len(context_chunks)} context chunks")
@@ -90,6 +134,7 @@ def analyze(description: str, context_chunks: list[RetrievedChunk]) -> dict:
     message = client.chat.completions.create(
         model=settings.openai_model,
         max_tokens=2048,
+        temperature=0.1,
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": user_message},
@@ -111,4 +156,4 @@ def analyze(description: str, context_chunks: list[RetrievedChunk]) -> dict:
         logger.error(f"LLM returned non-JSON: {raw_text[:200]}")
         raise ValueError(f"LLM response is not valid JSON: {exc}") from exc
 
-    return result
+    return _sanitize(result)

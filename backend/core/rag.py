@@ -12,7 +12,7 @@ from loguru import logger
 from config import settings
 from pipeline.embed import COLLECTION_NAME, EMBED_MODEL
 
-MAX_DISTANCE = 0.8
+MAX_DISTANCE = 0.92
 
 
 @dataclass

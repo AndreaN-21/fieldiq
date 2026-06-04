@@ -25,36 +25,28 @@ DOCUMENTS: list[dict[str, str]] = [
         "language": "en",
     },
     {
-        "filename": "eu_epbd_2010_31_en.pdf",
-        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX:32010L0031"
-         ,
-        "title": "EU Directive 2010/31/EU — Energy Performance of Buildings",
+        "filename": "eu_iot_1275_2024_en.pdf",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=OJ:L_202401275",
+        "title": "Directive (EU) 2024/1275 of the European Parliament and of the council",
         "language": "en",
     },
-    {
-        "filename": "eu_floods_2007_60_en.pdf",
-        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX:32007L0060",
-        "title": "EU Directive 2007/60/EC — Assessment and Management of Flood Risks",
-        "language": "en",
-    },
-    # FEMA — US Federal Emergency Management Agency, served from their CDN
-    {
-        "filename": "fema_p154_rapid_visual_screening.pdf",
-        "source_url": (
-            "https://www.fema.gov/sites/default/files/2020-07/"
-            "fema_rapid-visual-screening-buildings_p-154.pdf"
-        ),
-        "title": "FEMA P-154: Rapid Visual Screening of Buildings for Potential Seismic Hazards",
-        "language": "en",
+   {
+        "filename": "seco_buildwise_guide_entretien_2023.pdf",
+        "source_url": "https://ecobuild.brussels/wp-content/uploads/2023/02/31400-fr-unprotected-guide-de-l-entretien-pour-des-batiments-durables-2023.pdf",
+        "title": "Guide de l'entretien pour des bâtiments durables – Édition 2023 (Buildwise / SECO)",
+        "language": "fr",
     },
     {
-        "filename": "fema_p2055_post_disaster_assessment.pdf",
-        "source_url": (
-            "https://www.fema.gov/sites/default/files/documents/fema_"
-            "p-2055-post-disaster-building-safety-evaluation-guidance.pdf"
-        ),
-        "title": "FEMA P-2055: Post-Disaster Building Safety Evaluation",
-        "language": "en",
+        "filename": "cstc_nit271_maconneries_2020.pdf",
+        "source_url": "https://www.benor.be/wp-content/uploads/2020/03/NIT_271.pdf",
+        "title": "CSTC NIT 271 – Exécution des maçonneries (Belgique, 2020)",
+        "language": "fr",
+    },
+    {
+        "filename": "cneaf_pathologie_maisons_2018.pdf",
+        "source_url": "http://cneaf.fr/wp-content/uploads/2018/09/CR-162eTRNTJ-du-15-juin-2018-1.pdf",
+        "title": "CNEAF – Pathologie des maisons individuelles: les désordres récurrents (2018)",
+        "language": "fr",
     },
     # NIST — National Institute of Standards and Technology, served from nvlpubs.nist.gov
     {
@@ -64,11 +56,17 @@ DOCUMENTS: list[dict[str, str]] = [
         "language": "en",
     },
     {
-        "filename": "nist_gcr_17_917_45_nonlinear_analysis.pdf",
-        "source_url": "https://nvlpubs.nist.gov/nistpubs/gcr/2017/NIST.GCR.17-917-45.pdf",
-        "title": "NIST GCR 17-917-45 — Guidelines for Nonlinear Structural Analysis",
+        "filename": "jrc_handbook2_reliability.pdf",
+        "source_url": "https://eurocodes.jrc.ec.europa.eu/sites/default/files/2021-12/handbook2.pdf",
+        "title": "JRC Handbook 2 — Reliability Backgrounds for Eurocodes",
         "language": "en",
-    }
+    },
+    {
+        "filename": "cstc_contact_2018_3_fissuration.pdf",
+        "source_url": "https://www.buildwise.be/media/1o2nnrdt/contact_fr_03_2018.pdf",
+        "title": "CSTC Contact 2018/3 – Fissuration dans les bâtiments et durabilité du béton",
+        "language": "fr",
+    },
 ]
 
 

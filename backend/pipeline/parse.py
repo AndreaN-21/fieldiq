@@ -84,11 +84,12 @@ def _infer_source_url(source_slug: str) -> str:
     """Map a filename slug back to a human-readable source URL for citations."""
     slug_to_url: dict[str, str] = {
         "eu_cpr_305_2011_en": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32011R0305",
-        "eu_epbd_2010_31_en": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32010L0031",
-        "eu_floods_2007_60_en": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32007L0060",
-        "fema_p154_rapid_visual_screening": "https://www.fema.gov/publications/rapid-visual-screening-buildings",
-        "fema_p2055_post_disaster_assessment": "https://www.fema.gov/publications/post-disaster-building-safety-evaluation",
+        "eu_iot_1275_2024_en": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=OJ:L_202401275",
+        "seco_buildwise_guide_entretien_2023": "https://ecobuild.brussels/wp-content/uploads/2023/02/31400-fr-unprotected-guide-de-l-entretien-pour-des-batiments-durables-2023.pdf",
+        "cstc_nit271_maconneries_2020": "https://www.benor.be/wp-content/uploads/2020/03/NIT_271.pdf",
+        "cneaf_pathologie_maisons_2018": "http://cneaf.fr/wp-content/uploads/2018/09/CR-162eTRNTJ-du-15-juin-2018-1.pdf",
         "nist_tn2220_concrete_inspection": "https://nvlpubs.nist.gov/nistpubs/TechnicalNotes/NIST.TN.2220.pdf",
-        "nist_gcr_17_917_45_nonlinear_analysis": "https://nvlpubs.nist.gov/nistpubs/gcr/2017/NIST.GCR.17-917-45.pdf",
+        "jrc_handbook2_reliability": "https://eurocodes.jrc.ec.europa.eu/sites/default/files/2021-12/handbook2.pdf",
+        "cstc_contact_2018_3_fissuration": "https://www.buildwise.be/media/1o2nnrdt/contact_fr_03_2018.pdf",
     }
     return slug_to_url.get(source_slug, f"https://fieldiq.local/sources/{source_slug}")

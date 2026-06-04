@@ -9,7 +9,7 @@ from loguru import logger
 from pipeline.chunk import Chunk
 
 COLLECTION_NAME = "building_norms"
-EMBED_MODEL = "all-MiniLM-L6-v2"
+EMBED_MODEL = "paraphrase-multilingual-MiniLM-L12-v2"
 # Batch size keeps memory usage bounded when embedding thousands of chunks
 BATCH_SIZE = 256
 
