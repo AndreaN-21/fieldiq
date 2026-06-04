@@ -69,7 +69,8 @@ def _format_chunks(chunks: list[RetrievedChunk]) -> str:
 
     parts: list[str] = []
     for chunk in chunks:
-        header = f"[Source: {chunk.title}, Page {chunk.page}, URL: {chunk.source_url}]"
+        location = f"§{chunk.section}" if chunk.section else f"p.{chunk.page}" 
+        header = f"[Source: {chunk.title}, Location: {location}, URL: {chunk.source_url}]"
         parts.append(f"{header}\n{chunk.text}")
 
     return "\n\n".join(parts)

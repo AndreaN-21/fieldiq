@@ -11,6 +11,34 @@ class PageDoc(TypedDict):
     text: str
     metadata: dict
 
+_TITLE_OVERRIDES: dict[str, str] = {
+    "cstc_nit271_maconneries_2020":
+        "CSTC NIT 271 — Exécution des maçonneries (2020)",
+    "seco_buildwise_guide_entretien_2023":
+        "Guide de l'entretien pour des bâtiments durables — Buildwise/SECO (2023)",
+    "cneaf_pathologie_maisons_2018":
+        "CNEAF — Pathologie des maisons individuelles (2018)",
+    "cstc_contact_2018_3_fissuration":
+        "CSTC Contact 2018/3 — Fissuration dans les bâtiments",
+    "nist_tn2220_concrete_inspection":
+        "NIST TN 2220 — Nondestructive Evaluation of Concrete Infrastructure",
+    "jrc_handbook2_reliability":
+        "JRC Handbook 2 — Reliability Backgrounds for Eurocodes",
+    "eu_cpr_305_2011_en":
+        "EU Construction Products Regulation No 305/2011",
+    "eu_epbd_2024_1275_en":
+        "EU Directive 2024/1275 — Energy Performance of Buildings",
+}
+
+def _extract_title(pdf: pdfplumber.PDF, fallback: str) -> str:
+    if fallback in _TITLE_OVERRIDES:
+        return _TITLE_OVERRIDES[fallback]   
+    try:
+        meta = pdf.metadata or {}
+        title = (meta.get("Title") or "").strip()
+        return title if title else fallback
+    except Exception:
+        return fallback
 
 def parse_pdf(pdf_path: Path) -> list[PageDoc]:
     """Parse a single PDF into a list of per-page dicts with text and metadata.
@@ -68,17 +96,6 @@ def parse_all_pdfs(raw_dir: Path) -> list[PageDoc]:
 
     logger.info(f"Total pages parsed: {len(all_docs)} from {len(pdfs)} PDFs")
     return all_docs
-
-
-def _extract_title(pdf: pdfplumber.PDF, fallback: str) -> str:
-    """Return the PDF metadata title or fall back to the filename slug."""
-    try:
-        meta = pdf.metadata or {}
-        title = (meta.get("Title") or "").strip()
-        return title if title else fallback
-    except Exception:  # noqa: BLE001
-        return fallback
-
 
 def _infer_source_url(source_slug: str) -> str:
     """Map a filename slug back to a human-readable source URL for citations."""

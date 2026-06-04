@@ -21,6 +21,7 @@ class RetrievedChunk:
     source: str
     title: str
     page: int
+    section: str
     source_url: str
     chunk_id: str
     distance: float
@@ -80,6 +81,7 @@ def retrieve(query: str, n_results: int = 5) -> list[RetrievedChunk]:
                 source_url=meta.get("source_url", ""),
                 chunk_id=meta.get("chunk_id", ""),
                 distance=dist,
+                section=meta.get("section", ""),
             )
         )
 
