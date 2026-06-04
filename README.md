@@ -114,29 +114,7 @@ documents.
 Sufficient for prototype observability. Trade-off: replace with PostgreSQL in
 production.
 
----
-
-## What goes to production tomorrow vs. what gets thrown away
-
-**Production-ready as-is:**
-- RAG pipeline architecture (retrieve → augment → generate)
-- Prompt design — validated against real defect descriptions; hallucination guard
-  tested explicitly
-- FastAPI structure — async, typed, 503 vs 422 vs 500 distinction at API boundary
-- Pydantic v2 models — strict validation catches LLM format errors before the
-  frontend
-
-**Throw away immediately:**
-- Hardcoded PDF list → continuous ingestion pipeline from SECO's report database
-- Local ChromaDB → managed vector store (Weaviate / Qdrant)
-- `paraphrase-multilingual-MiniLM-L12-v2` → construction-domain fine-tuned
-  embedding model trained on SECO's past reports
-- Manual PDF seeding → scheduled ingestion job with deduplication
-- SQLite → PostgreSQL + observability stack
-
----
-
-## If I had 3 more months
+## If I had 1 more month
 
 **Photo upload with VLM detection.** Inspector attaches a photo; a vision-language
 model auto-populates the description field and adds a visual defect classification.
@@ -168,36 +146,60 @@ paths — 422 on short descriptions, 503 on API failure, never a raw 500.
 - Node.js 18+
 - An OpenAI API key (or compatible endpoint)
 
-### Option 1 — Docker (recommended)
+### 1. Environment variables
 
 ```bash
-cp .env.example .env      # set OPENAI_API_KEY
-bash scripts/seed.sh      # download PDFs and build the ChromaDB index (~2 min)
-docker-compose up --build
+cp .env.example .env
 ```
 
-- Frontend: http://localhost:5173
-- API: http://localhost:8000
-- Health: http://localhost:8000/api/health → `{"status": "ok", "indexed_documents": N}`
+Edit `.env` and set at minimum:
 
-### Option 2 — Manual
+```
+OPENAI_API_KEY=your_key_here
+OPENAI_BASE_URL=https://api.openai.com/v1   # or your custom endpoint
+```
+
+### 2. Backend — install dependencies
 
 ```bash
-# 1. Configure environment
-cp .env.example .env      # set OPENAI_API_KEY
-
-# 2. Build the knowledge base
-bash scripts/seed.sh
-# Downloads PDFs, installs Python deps in a venv,
-# embeds all chunks into ChromaDB. Run once.
-
-# 3. Start backend (terminal 1)
-cd backend && source .venv/bin/activate
-uvicorn main:app --port 8000 --reload
-
-# 4. Start frontend (terminal 2)
-cd frontend && npm install && npm run dev
+cd backend
+python -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
 ```
+
+### 3. Build the knowledge base
+
+Downloads the PDF documents, parses them, and builds the ChromaDB index.
+Run once (or with `--force-reload` to rebuild from scratch).
+
+```bash
+cd backend
+python pipeline/run_pipeline.py
+```
+
+This takes ~2 minutes on first run (downloads ~8 PDFs and embeds all chunks).
+
+### 4. Start the backend
+
+```bash
+cd backend
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+API: `http://localhost:8000`  
+Docs: `http://localhost:8000/docs`  
+Health: `http://localhost:8000/api/health` → `{"status": "ok", "indexed_documents": N}`
+
+### 5. Start the frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+App: `http://localhost:5173`
 
 ### Environment variables
 
