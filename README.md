@@ -74,6 +74,7 @@ matters more than breadth for an MVP.
 | `eu_cpr_305_2011_en.pdf` | [EU CPR 305/2011](https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX:32011R0305) | EU Construction Products Regulation — regulatory framework for construction product compliance |
 | `eu_epbd_2024_1275_en.pdf` | [EU EPBD 2024/1275](https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=OJ:L_202401275) | Recast Energy Performance of Buildings Directive — envelope and energy requirements |
 
+
 ---
 
 ## Technical decisions and trade-offs
@@ -114,7 +115,25 @@ documents.
 Sufficient for prototype observability. Trade-off: replace with PostgreSQL in
 production.
 
-## If I had 1 more month
+## What goes to production tomorrow vs. what gets thrown away
+
+**Keep — production-ready today:**
+- RAG pipeline architecture (retrieve → augment → generate). The pattern is sound regardless of the document corpus.
+- Prompt design. The CRITICAL RULES block (no norm hallucination, mandatory citations, `p.<n>` fallback for unnumbered guides) was developed against real defect descriptions and solves real failure modes.
+- FastAPI structure — async handlers, typed request/response models, 503 vs 500 distinction at the API boundary.
+- Pydantic v2 models — strict validation catches malformed LLM output before it reaches the frontend.
+- `_sanitize()` post-processor — defensive layer against the specific GPT-4o-mini formatting regressions observed in testing.
+
+**Throw away:**
+- Manual PDF seeding → replace with a scheduled ingestion job that pulls from SECO's report management system.
+- Local ChromaDB → replace with Weaviate or Qdrant on managed infrastructure with access control.
+- `paraphrase-multilingual-MiniLM-L12-v2` → replace with a model fine-tuned on SECO's defect vocabulary after collecting inspector feedback.
+- SQLite query log → replace with PostgreSQL + a metrics dashboard (Grafana or Metabase).
+- `MAX_DISTANCE` hardcoded at 0.92 → replace with a per-query confidence score and a calibrated rejection threshold.
+
+---
+
+## If I had 2 more months
 
 **Photo upload with VLM detection.** Inspector attaches a photo; a vision-language
 model auto-populates the description field and adds a visual defect classification.
