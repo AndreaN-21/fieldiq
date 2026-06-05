@@ -1,0 +1,16 @@
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
+pydantic>=2.7.0
+pydantic-settings>=2.3.0
+openai>=1.30.0
+chromadb>=0.5.3
+langchain>=0.2.6
+langchain-community>=0.2.6
+langchain-text-splitters>=0.2.2
+sentence-transformers>=3.0.1
+pdfplumber>=0.11.4
+requests>=2.32.3
+tqdm>=4.66.4
+loguru>=0.7.2
+aiofiles>=24.1.0
+aiosqlite>=0.20.0

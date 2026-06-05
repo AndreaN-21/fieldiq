@@ -1,0 +1,144 @@
+.defect-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.defect-form__label {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #1e3a5f;
+}
+
+.defect-form__examples {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.defect-form__examples-label {
+  font-size: 0.78rem;
+  color: #6b7280;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.defect-form__example-btn {
+  text-align: left;
+  background: #f0f4f9;
+  border: 1px solid #d1dce8;
+  border-radius: 5px;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.83rem;
+  color: #1e3a5f;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.defect-form__example-btn:hover:not(:disabled) {
+  background: #dbeafe;
+  border-color: #1e3a5f;
+}
+
+.defect-form__example-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.defect-form__textarea-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.defect-form__textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #111827;
+  resize: vertical;
+  box-sizing: border-box;
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+
+.defect-form__textarea:focus {
+  outline: none;
+  border-color: #1e3a5f;
+  box-shadow: 0 0 0 2px rgba(30, 58, 95, 0.12);
+}
+
+.defect-form__textarea:disabled {
+  background: #f9fafb;
+  cursor: not-allowed;
+}
+
+.defect-form__counter {
+  font-size: 0.78rem;
+  color: #9ca3af;
+  text-align: right;
+}
+
+.defect-form__counter--warn {
+  color: #ca8a04;
+  font-weight: 600;
+}
+
+.defect-form__error {
+  margin: 0;
+  padding: 0.6rem 0.85rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  color: #dc2626;
+  font-size: 0.88rem;
+}
+
+.defect-form__submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.5rem;
+  background: #1e3a5f;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+  width: fit-content;
+}
+
+.defect-form__submit:hover:not(:disabled) {
+  background: #2d5282;
+}
+
+.defect-form__submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* CSS-only spinner */
+.defect-form__spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
