@@ -165,6 +165,58 @@ paths — 422 on short descriptions, 503 on API failure, never a raw 500.
 - Node.js 18+
 - An OpenAI API key (or compatible endpoint)
 
+---
+
+### Docker (recommended)
+
+Runs the full stack (backend + frontend).
+
+**Prerequisites:** Docker and Docker Compose v2.
+
+**1. Environment variables**
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and set at minimum:
+
+```
+OPENAI_API_KEY=your_key_here
+```
+
+**2. Build and start**
+
+```bash
+docker compose up --build
+```
+
+| Service | URL |
+|---|---|
+| App | http://localhost |
+| API docs | http://localhost:8000/docs |
+| Health | http://localhost:8000/api/health |
+
+**First run** takes 3–5 minutes: the backend downloads ~8 PDFs, embeds all chunks, and caches the HuggingFace model. Subsequent starts are instant (data is persisted in Docker volumes).
+
+**Stop**
+
+```bash
+docker compose down          # keeps data
+docker compose down -v       # also deletes all volumes (full reset)
+```
+
+**Optional — change the backend host port** (default `8000`):
+
+```
+# .env
+BACKEND_PORT=9000
+```
+
+---
+
+### Manual setup
+
 ### 1. Environment variables
 
 ```bash
