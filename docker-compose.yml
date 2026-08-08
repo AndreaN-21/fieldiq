@@ -1,0 +1,33 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    env_file:
+      - .env
+    environment:
+      # Override the root-relative paths from .env with container-relative ones
+      CHROMA_PERSIST_DIR: ./data/chroma
+      RAW_DATA_DIR: ./data/raw
+      SQLITE_DB_PATH: ./data/app.db
+      FRONTEND_URL: http://localhost
+    volumes:
+      - fieldiq_data:/app/data
+      - hf_cache:/root/.cache/huggingface
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: ""
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  fieldiq_data:
+  hf_cache:

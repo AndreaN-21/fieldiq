@@ -29,7 +29,7 @@ function App() {
         )}
       </main>
       <footer className="app-footer">
-        <p>SECO Group — AI &amp; Data Engineer Challenge · FieldIQ MVP</p>
+        <p>FieldIQ MVP — RAG-grounded defect analysis</p>
       </footer>
     </>
 

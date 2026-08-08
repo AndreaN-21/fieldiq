@@ -8,7 +8,7 @@ from real technical standards — in under five seconds.
 
 ## What problem does it solve, and for whom?
 
-**User:** A SECO field inspector conducting an on-site building inspection.
+**User:** A field inspector conducting an on-site building inspection.
 
 When an inspector observes a defect — efflorescence on a basement wall, a diagonal
 crack from a window lintel, spalling on a reinforced concrete column — they face four
@@ -33,30 +33,6 @@ cannot.
 
 ---
 
-## Why is this relevant to SECO?
-
-SECO's core asset is accumulated inspection knowledge: thousands of defect
-observations, severity assessments, and norm references, generated over decades of
-activity. That knowledge currently sits in PDFs and internal systems.
-
-FieldIQ is a direct prototype of how SECO could productize that corpus. This MVP
-uses public technical documents as the knowledge base. Replace them with SECO's
-proprietary inspection reports and the value compounds: the system learns which
-defect patterns appear most frequently, which norms are cited most often, and how
-severity assessments vary across building types and age cohorts.
-
-One data point worth noting: one of the documents in this MVP's knowledge base —
-the *Guide de l'entretien pour des bâtiments durables* (Buildwise, 2023) — was
-co-authored by SECO itself. The architecture here is a direct analogue of what
-SECO would build on top of its own corpus.
-
-The project also addresses a structural risk for any inspection firm: knowledge
-concentration. When senior inspectors leave or retire, their pattern-recognition
-leaves with them. A RAG system trained on their past assessments partially
-preserves it.
-
----
-
 ## Data sources
 
 All sources are publicly accessible without login. No paywalled standards (AFNOR,
@@ -65,7 +41,7 @@ matters more than breadth for an MVP.
 
 | File | Source | What it contributes |
 |---|---|---|
-| `seco_buildwise_guide_entretien_2023.pdf` | [Buildwise / SECO, 2023](https://ecobuild.brussels/wp-content/uploads/2023/02/31400-fr-unprotected-guide-de-l-entretien-pour-des-batiments-durables-2023.pdf) | Building maintenance guide covering moisture, facades, roofing, structures. **Co-authored by SECO.** |
+| `buildwise_guide_entretien_2023.pdf` | [Buildwise, 2023](https://ecobuild.brussels/wp-content/uploads/2023/02/31400-fr-unprotected-guide-de-l-entretien-pour-des-batiments-durables-2023.pdf) | Building maintenance guide covering moisture, facades, roofing, structures |
 | `cstc_nit271_maconneries_2020.pdf` | [BENOR / CSTC NIT 271, 2020](https://www.benor.be/wp-content/uploads/2020/03/NIT_271.pdf) | Belgian masonry execution standard — wall bonding, waterproofing, efflorescence |
 | `cneaf_pathologie_maisons_2018.pdf` | [CNEAF, 2018](http://cneaf.fr/wp-content/uploads/2018/09/CR-162eTRNTJ-du-15-juin-2018-1.pdf) | French expert report on recurring residential building pathologies — cracks, infiltrations, foundations |
 | `cstc_contact_2018_3_fissuration.pdf` | [CSTC Contact 2018/3](https://www.buildwise.be/media/1o2nnrdt/contact_fr_03_2018.pdf) | Technical note on cracking caused by soil movement and concrete durability |
@@ -88,7 +64,7 @@ Trade-off: ~500 MB vs ~90 MB model size, slightly slower initial embedding.
 
 **ChromaDB as vector store**
 Zero infrastructure, fully reproducible, runs as a local file store. Chosen
-specifically to satisfy the challenge's "public and reproducible" constraint.
+specifically to keep the knowledge base public and reproducible.
 Trade-off: not suitable for production multi-tenant workloads. Would be replaced
 with Weaviate or Qdrant on managed infrastructure.
 
@@ -125,9 +101,9 @@ production.
 - `_sanitize()` post-processor — defensive layer against the specific GPT-4o-mini formatting regressions observed in testing.
 
 **Throw away:**
-- Manual PDF seeding → replace with a scheduled ingestion job that pulls from SECO's report management system.
+- Manual PDF seeding → replace with a scheduled ingestion job that pulls from the organisation's report management system.
 - Local ChromaDB → replace with Weaviate or Qdrant on managed infrastructure with access control.
-- `paraphrase-multilingual-MiniLM-L12-v2` → replace with a model fine-tuned on SECO's defect vocabulary after collecting inspector feedback.
+- `paraphrase-multilingual-MiniLM-L12-v2` → replace with a model fine-tuned on the organisation's defect vocabulary after collecting inspector feedback.
 - SQLite query log → replace with PostgreSQL + a metrics dashboard (Grafana or Metabase).
 - `MAX_DISTANCE` hardcoded at 0.92 → replace with a per-query confidence score and a calibrated rejection threshold.
 
@@ -141,11 +117,11 @@ The text flow stays identical downstream.
 
 **Inspector feedback loop.** Thumbs-up / correction on every result. Corrections
 become labelled training data. After 500–1000 corrections, fine-tune the embedding
-model on SECO's specific defect vocabulary.
+model on the organisation's specific defect vocabulary.
 
-**SECO corpus integration.** Replace public PDFs with SECO's actual past inspection
-reports as the knowledge base. The retrieval quality improves as the corpus grows.
-The system's answers become SECO's institutional knowledge, not generic norms.
+**Proprietary corpus integration.** Replace public PDFs with the organisation's own
+past inspection reports as the knowledge base. The retrieval quality improves as the
+corpus grows. The system's answers become institutional knowledge, not generic norms.
 
 **Mobile PWA.** Optimised for one-handed phone use with offline support. The
 current React UI works on mobile but was not designed for it.
@@ -164,6 +140,58 @@ paths — 422 on short descriptions, 503 on API failure, never a raw 500.
 - Python 3.9+
 - Node.js 18+
 - An OpenAI API key (or compatible endpoint)
+
+---
+
+### Docker (recommended)
+
+Runs the full stack (backend + frontend).
+
+**Prerequisites:** Docker and Docker Compose v2.
+
+**1. Environment variables**
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and set at minimum:
+
+```
+OPENAI_API_KEY=your_key_here
+```
+
+**2. Build and start**
+
+```bash
+docker compose up --build
+```
+
+| Service | URL |
+|---|---|
+| App | http://localhost |
+| API docs | http://localhost:8000/docs |
+| Health | http://localhost:8000/api/health |
+
+**First run** takes 3–5 minutes: the backend downloads ~8 PDFs, embeds all chunks, and caches the HuggingFace model. Subsequent starts are instant (data is persisted in Docker volumes).
+
+**Stop**
+
+```bash
+docker compose down          # keeps data
+docker compose down -v       # also deletes all volumes (full reset)
+```
+
+**Optional — change the backend host port** (default `8000`):
+
+```
+# .env
+BACKEND_PORT=9000
+```
+
+---
+
+### Manual setup
 
 ### 1. Environment variables
 
